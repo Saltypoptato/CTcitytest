@@ -1,0 +1,3003 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CT City Board Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Font Import - Replace with your font URL */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+        
+        /* Custom Background for Main Menu */
+        .custom-main-menu-bg {
+            /* Option 1: Use your own image URL */
+            background-image: url('images/mainbackground.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #667eea;
+        }
+        
+        /* Custom Font Application */
+        .custom-font {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .board-cell {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .board-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .algorithm { 
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A); 
+            color: #92400E; 
+            border-color: #F59E0B;
+        }
+        .pattern { 
+            background: linear-gradient(135deg, #DBEAFE, #BFDBFE); 
+            color: #1E40AF; 
+            border-color: #3B82F6;
+        }
+        .abstraction { 
+            background: linear-gradient(135deg, #FCE7F3, #FBCFE8); 
+            color: #BE185D; 
+            border-color: #EC4899;
+        }
+        .decomposition { 
+            background: linear-gradient(135deg, #FED7AA, #FDBA74); 
+            color: #C2410C; 
+            border-color: #EA580C;
+        }
+        .start {
+            background: linear-gradient(135deg, #F3E8FF, #E9D5FF);
+            color: #6B21A8;
+            border-color: #8B5CF6;
+        }
+        
+        .zone-border {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .zone-label {
+            position: absolute;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .algorithm-zone {
+            border-color: #F59E0B;
+        }
+        
+        .pattern-zone {
+            border-color: #3B82F6;
+        }
+        
+        .abstraction-zone {
+            border-color: #EC4899;
+        }
+        
+        .decomposition-zone {
+            border-color: #EA580C;
+        }
+        
+        .algorithm-label {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .pattern-label {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        }
+        
+        .abstraction-label {
+            background: linear-gradient(135deg, #EC4899, #BE185D);
+        }
+        
+        .decomposition-label {
+            background: linear-gradient(135deg, #EA580C, #C2410C);
+        }
+        
+        .player-token {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 20;
+            transition: all 0.4s ease;
+        }
+        
+        .dice {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        
+        .dice-rolling {
+            animation: roll 0.5s infinite;
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .card {
+            width: 80px;
+            height: 120px;
+            border-radius: 12px;
+            padding: 8px;
+            margin: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        }
+        
+        .card:hover {
+            transform: translateY(-20px) scale(1.1);
+            z-index: 10;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        
+        .card-in-hand {
+            width: 60px;
+            height: 90px;
+            font-size: 0.8rem;
+            transform: translateY(20px);
+            filter: brightness(0.7);
+            transition: all 0.3s ease;
+            margin: -5px;
+        }
+        
+        .card-in-hand:hover {
+            transform: translateY(-10px) scale(1.2);
+            filter: brightness(1);
+            z-index: 15;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+        }
+        
+        .card-in-hand .card-emoji {
+            font-size: 1.2rem;
+        }
+        
+        .card-in-hand .card-name {
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+        
+        .card-in-hand .card-description {
+            font-size: 0.5rem;
+            display: none; /* Hide description in hand view */
+        }
+        
+        .card-selected {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 2px #fbbf24, 0 8px 16px rgba(0,0,0,0.3);
+        }
+        
+        .panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .panel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .panel-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+        
+        .highlight-cell {
+            animation: highlight 0.5s ease;
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .move-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #3B82F6;
+            border-radius: 50%;
+            animation: moveIndicator 0.4s ease;
+            z-index: 15;
+        }
+        
+        @keyframes moveIndicator {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes winCelebration {
+            0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes fireworks {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .win-screen {
+            background: url(images/background.png);
+            background-size: 400% 400%;
+            animation: rainbow 3s ease infinite;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti 3s linear infinite;
+        }
+
+        .firework {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: fireworks 1s ease-out infinite;
+        }
+
+        .decorative-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+        }
+        
+        .bg-gradient-radial {
+            background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+        }
+        
+        .game-table-bg {
+            background-image: url('images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #667eea;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-50 min-h-screen decorative-pattern custom-font">
+    <!-- Main Menu -->
+    <div id="mainMenu" class="min-h-screen flex items-center justify-center p-4 custom-main-menu-bg relative overflow-hidden">
+        <!-- Animated Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <!-- Floating Shapes -->
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white bg-opacity-20 rounded-full animate-bounce" style="animation-delay: 0s; animation-duration: 3s;"></div>
+            <div class="absolute top-32 right-20 w-16 h-16 bg-yellow-300 bg-opacity-30 rounded-full animate-bounce" style="animation-delay: 1s; animation-duration: 4s;"></div>
+            <div class="absolute bottom-20 left-32 w-12 h-12 bg-pink-300 bg-opacity-30 rounded-full animate-bounce" style="animation-delay: 2s; animation-duration: 2.5s;"></div>
+            <div class="absolute bottom-40 right-10 w-24 h-24 bg-green-300 bg-opacity-25 rounded-full animate-bounce" style="animation-delay: 0.5s; animation-duration: 3.5s;"></div>
+            
+            <!-- Floating Icons -->
+            <div class="absolute top-20 right-32 text-4xl animate-pulse" style="animation-delay: 1s;">🧩</div>
+            <div class="absolute bottom-32 left-20 text-3xl animate-pulse" style="animation-delay: 2s;">⚔️</div>
+            <div class="absolute top-1/2 left-10 text-2xl animate-pulse" style="animation-delay: 0.5s;">🛡️</div>
+            <div class="absolute top-1/3 right-10 text-3xl animate-pulse" style="animation-delay: 1.5s;">❌</div>
+        </div>
+        
+        <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-10 max-w-lg w-full text-center relative z-10 border-4 border-gradient-to-r from-purple-400 to-blue-400 backdrop-blur-sm custom-font">
+            <!-- Decorative Header -->
+            <div class="relative mb-8">
+                <div class="text-8xl mb-4 animate-pulse">🎮</div>
+                <div class="absolute -top-2 -left-2 text-2xl animate-spin" style="animation-duration: 8s;">⭐</div>
+                <div class="absolute -top-2 -right-2 text-2xl animate-spin" style="animation-duration: 6s; animation-direction: reverse;">✨</div>
+            </div>
+            
+            <!-- Title with Gradient -->
+            <div class="mb-8">
+                <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    CT City
+                </h1>
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span class="text-2xl">🏙️</span>
+                    <h2 class="text-xl text-gray-600 font-semibold">Board Game Adventure</h2>
+                    <span class="text-2xl">🎯</span>
+                </div>
+                <div class="text-sm text-gray-500 italic">Computational Thinking Challenge</div>
+            </div>
+            
+            <!-- Decorative Divider -->
+            <div class="flex items-center justify-center mb-8">
+                <div class="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent flex-1"></div>
+                <div class="mx-4 text-2xl">🎲</div>
+                <div class="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent flex-1"></div>
+            </div>
+            
+            <div class="space-y-4">
+                <button id="playOnlineBtn" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <span class="flex items-center justify-center gap-3">
+                        <span class="text-2xl">🌐</span>
+                        <span>Play Online</span>
+                        <span class="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">Multiplayer</span>
+                    </span>
+                </button>
+                <button id="playWithAIBtn" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <span class="flex items-center justify-center gap-3">
+                        <span class="text-2xl">🤖</span>
+                        <span>Play with AI</span>
+                        <span class="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">Solo</span>
+                    </span>
+                </button>
+                <button id="howToPlayBtn" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <span class="flex items-center justify-center gap-3">
+                        <span class="text-2xl">📖</span>
+                        <span>How to Play</span>
+                        <span class="text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full">Guide</span>
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Footer Info -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
+                    <span class="flex items-center gap-1">
+                        <span>👥</span>
+                        <span>2-4 Players</span>
+                    </span>
+                    <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                    <span class="flex items-center gap-1">
+                        <span>⏱️</span>
+                        <span>20-30 min</span>
+                    </span>
+                    <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                    <span class="flex items-center gap-1">
+                        <span>🎓</span>
+                        <span>Ages 12+</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Searching for Players -->
+    <div id="searchingScreen" class="hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-100 via-pink-50 to-blue-50 decorative-pattern">
+        <div class="bg-white bg-opacity-95 rounded-lg shadow-2xl p-8 max-w-md w-full text-center backdrop-blur-sm">
+            <div class="text-6xl mb-6 animate-bounce">🔍</div>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Searching for Players...</h2>
+            <div class="mb-6">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            </div>
+            <p class="text-gray-600 mb-6">Finding other players to join your game</p>
+            <div class="bg-gray-100 rounded-lg p-4 mb-6">
+                <div class="text-sm text-gray-600">Players found:</div>
+                <div class="text-2xl font-bold" id="playersFound">1/4</div>
+            </div>
+            <button id="cancelSearchBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Character Selection -->
+    <div id="characterSelection" class="hidden min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-100 via-pink-50 to-blue-50 decorative-pattern">
+        <div class="bg-white bg-opacity-95 rounded-lg shadow-2xl p-8 max-w-4xl w-full backdrop-blur-sm">
+            <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Choose Your Character</h1>
+            <h2 class="text-xl font-semibold text-center mb-6 text-gray-600">Select one character to play with</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="character-option bg-blue-50 p-6 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors border-2 border-transparent relative" data-character="frog">
+                    <div class="flex items-center mb-4">
+                        <div class="text-6xl mr-4">🐸</div>
+                        <div>
+                            <h3 class="font-bold text-xl">Frog</h3>
+                            <div class="text-sm text-blue-600 font-semibold">Zone Jumper</div>
+                        </div>
+                    </div>
+                    <div class="text-left space-y-2">
+                        <div class="text-sm"><span class="font-semibold">Special Ability:</span> Leap Forward</div>
+                        <div class="text-sm text-gray-600">• Jump 5 spaces ahead instantly</div>
+                        <div class="text-sm text-gray-600">• Can be used 2 times per game</div>
+                        <div class="text-sm text-gray-600">• Available every 4 rounds</div>
+                        <div class="text-xs bg-blue-200 p-2 rounded mt-3">Perfect for quick positioning and escaping bad situations!</div>
+                    </div>
+                </div>
+                
+                <div class="character-option bg-green-50 p-6 rounded-lg cursor-pointer hover:bg-green-100 transition-colors border-2 border-transparent relative" data-character="cat">
+                    <div class="flex items-center mb-4">
+                        <div class="text-6xl mr-4">🐱</div>
+                        <div>
+                            <h3 class="font-bold text-xl">Cat</h3>
+                            <div class="text-sm text-green-600 font-semibold">Card Spy</div>
+                        </div>
+                    </div>
+                    <div class="text-left space-y-2">
+                        <div class="text-sm"><span class="font-semibold">Special Ability:</span> Peek & Plan</div>
+                        <div class="text-sm text-gray-600">• See what cards are coming next</div>
+                        <div class="text-sm text-gray-600">• Can be used 2 times per game</div>
+                        <div class="text-sm text-gray-600">• Available every 4 rounds</div>
+                        <div class="text-xs bg-green-200 p-2 rounded mt-3">Great for strategic planning and avoiding surprises!</div>
+                    </div>
+                </div>
+                
+                <div class="character-option bg-yellow-50 p-6 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors border-2 border-transparent relative" data-character="rabbit">
+                    <div class="flex items-center mb-4">
+                        <div class="text-6xl mr-4">🐰</div>
+                        <div>
+                            <h3 class="font-bold text-xl">Rabbit</h3>
+                            <div class="text-sm text-yellow-600 font-semibold">Speed Booster</div>
+                        </div>
+                    </div>
+                    <div class="text-left space-y-2">
+                        <div class="text-sm"><span class="font-semibold">Special Ability:</span> Lucky Hop</div>
+                        <div class="text-sm text-gray-600">• Add +5 to your next dice roll</div>
+                        <div class="text-sm text-gray-600">• Can be used 2 times per game</div>
+                        <div class="text-sm text-gray-600">• Available every 5 rounds</div>
+                        <div class="text-xs bg-yellow-200 p-2 rounded mt-3">Excellent for reaching specific targets and covering distance!</div>
+                    </div>
+                </div>
+                
+                <div class="character-option bg-orange-50 p-6 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors border-2 border-transparent relative" data-character="duck">
+                    <div class="flex items-center mb-4">
+                        <div class="text-6xl mr-4">🦆</div>
+                        <div>
+                            <h3 class="font-bold text-xl">Duck</h3>
+                            <div class="text-sm text-orange-600 font-semibold">Card Master</div>
+                        </div>
+                    </div>
+                    <div class="text-left space-y-2">
+                        <div class="text-sm"><span class="font-semibold">Special Ability:</span> Card Control</div>
+                        <div class="text-sm text-gray-600">• Discard unwanted cards strategically</div>
+                        <div class="text-sm text-gray-600">• Can be used 4 times per game</div>
+                        <div class="text-sm text-gray-600">• Available every 3 rounds</div>
+                        <div class="text-xs bg-orange-200 p-2 rounded mt-3">Best for managing your hand and tactical card play!</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="startGameBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg text-xl transition-colors disabled:opacity-50" disabled>
+                    Start Game
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 invisible transition-all duration-300 ease-out">
+        <div class="bg-white bg-opacity-95 rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-96 overflow-y-auto backdrop-blur-sm mx-4 transform scale-90 transition-all duration-300 ease-out">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800">How to Play</h2>
+                <button id="closeGuideBtn" class="text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                    ×
+                </button>
+            </div>
+            <div class="space-y-4 text-gray-700">
+                <div class="border-l-4 border-blue-500 pl-4 bg-blue-50 p-3 rounded-r-lg">
+                    <h3 class="font-bold text-lg flex items-center gap-2">🎯 Objective</h3>
+                    <p>Move around the board, answer questions, and collect cards to win!</p>
+                </div>
+                <div class="border-l-4 border-green-500 pl-4 bg-green-50 p-3 rounded-r-lg">
+                    <h3 class="font-bold text-lg flex items-center gap-2">🎲 Gameplay</h3>
+                    <p>Roll dice to move, land on symbols to trigger actions, and use your character's special abilities.</p>
+                </div>
+                <div class="border-l-4 border-yellow-500 pl-4 bg-yellow-50 p-3 rounded-r-lg">
+                    <h3 class="font-bold text-lg flex items-center gap-2">🧩 Symbols</h3>
+                    <p>🧩 Answer questions | ❌ Choose actions | ⚔️ Challenge players | 🛡️ Get shield cards</p>
+                </div>
+                <div class="border-l-4 border-purple-500 pl-4 bg-purple-50 p-3 rounded-r-lg">
+                    <h3 class="font-bold text-lg flex items-center gap-2">🏆 Winning</h3>
+                    <p>Get the highest score after 20 rounds or find the Win Card!</p>
+                </div>
+                <div class="border-l-4 border-indigo-500 pl-4 bg-indigo-50 p-3 rounded-r-lg">
+                    <h3 class="font-bold text-lg flex items-center gap-2">✨ Special Abilities</h3>
+                    <p>Each character has unique powers that can be used strategically during the game!</p>
+                </div>
+            </div>
+            <div class="text-center mt-6">
+                <button id="backToMenuBtn" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Board -->
+    <div id="gameBoard" class="hidden min-h-screen game-table-bg relative overflow-hidden">
+        <!-- Game Table Background -->
+        <div class="absolute inset-0 bg-gradient-radial from-green-600 to-green-900 opacity-20"></div>
+        
+        <!-- Round Counter - Top Left of Screen -->
+        <div class="absolute top-4 left-4 bg-white rounded-xl shadow-lg p-4 min-w-32 text-center z-30">
+            <div class="text-sm text-gray-600 mb-1">Round</div>
+            <div class="text-3xl font-bold text-purple-600 mb-2" id="roundCounter">1</div>
+            <div class="text-xs text-gray-500">of 20</div>
+        </div>
+        
+        <!-- Player Positions Around the Board -->
+        <!-- Top Player (Opponent 1) -->
+        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+            <div class="bg-white rounded-xl shadow-lg p-3 min-w-48" id="player2Info">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold" id="player2Avatar">
+                        🐱
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-sm" id="player2Name">Player 2</div>
+                        <div class="text-xs text-gray-600">Score: <span id="player2Score">0</span></div>
+                        <div class="text-xs text-blue-600">Cards: <span id="player2CardCount">3</span></div>
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-gray-300" id="player2Turn"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Player (Opponent 2) -->
+        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20">
+            <div class="bg-white rounded-xl shadow-lg p-3 min-w-48" id="player3Info">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-xl font-bold" id="player3Avatar">
+                        🐰
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-sm" id="player3Name">Player 3</div>
+                        <div class="text-xs text-gray-600">Score: <span id="player3Score">0</span></div>
+                        <div class="text-xs text-purple-600">Cards: <span id="player3CardCount">3</span></div>
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-gray-300" id="player3Turn"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Player (Opponent 3) -->
+        <div class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20">
+            <div class="bg-white rounded-xl shadow-lg p-3 min-w-48" id="player4Info">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xl font-bold" id="player4Avatar">
+                        🦆
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-sm" id="player4Name">Player 4</div>
+                        <div class="text-xs text-gray-600">Score: <span id="player4Score">0</span></div>
+                        <div class="text-xs text-orange-600">Cards: <span id="player4CardCount">3</span></div>
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-gray-300" id="player4Turn"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Game Board -->
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="relative">
+                <!-- Circular Board -->
+                <div class="w-96 h-96 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full shadow-2xl border-8 border-white relative game-board">
+                    <!-- Center Logo -->
+                    <div class="absolute w-32 h-32 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10" style="left: calc(50% - 64px); top: calc(50% - 64px);">
+                        <div class="text-center text-white">
+                            <div class="text-3xl mb-1">🏙️</div>
+                            <div class="text-xs font-bold">CT CITY</div>
+                        </div>
+                    </div>
+                    <!-- Board cells will be created here -->
+                </div>
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+
+        <!-- Bottom Player (You) - Player Info with Dice Controls -->
+        <div class="absolute bottom-4 left-20 z-30 flex gap-4">
+            <!-- Player Info -->
+            <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold border-2 border-white" id="player1Avatar">
+                        🐸
+                    </div>
+                    <div>
+                        <div class="font-bold" id="player1Name">You</div>
+                        <div class="text-sm opacity-90">Score: <span id="player1Score">0</span></div>
+                    </div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse" id="player1Turn"></div>
+                </div>
+                
+                <button id="useCardBtn" class="mt-3 w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-red-700 font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg border-2 border-yellow-300">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">🃏</span>
+                        <span>Use Card</span>
+                        <span class="text-sm bg-red-600 text-white px-2 py-1 rounded-full">Play</span>
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Dice Controls -->
+            <div class="bg-white rounded-xl shadow-lg p-4">
+                <!-- Dice -->
+                <div class="flex justify-center gap-2 mb-3">
+                    <div class="dice bg-white border-2 border-gray-300 shadow-md" id="dice1">1</div>
+                    <div class="dice bg-white border-2 border-gray-300 shadow-md" id="dice2">1</div>
+                </div>
+                
+                <button id="rollDiceBtn" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 shadow-md">
+                    🎲 Roll Dice
+                </button>
+            </div>
+        </div>
+
+        <!-- Card Hand & Special Ability - UNO Style (Bottom Right) -->
+        <div class="absolute bottom-4 right-4 z-30 flex flex-col gap-3">
+            <!-- Special Ability Panel -->
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-xl shadow-lg">
+                <h3 class="font-bold text-sm mb-2 text-center">Special Ability</h3>
+                <p class="text-xs opacity-90 mb-3 text-center" id="abilityDescription">Ready to use!</p>
+                <button id="specialAbilityBtn" class="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-purple-700 font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg border-2 border-yellow-300 disabled:opacity-50 disabled:transform-none">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-lg">✨</span>
+                        <span>Use Power</span>
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Card Hand -->
+            <div class="bg-gradient-to-br from-red-600 to-red-700 p-4 rounded-xl shadow-2xl max-w-md">
+                <div class="flex justify-end items-end gap-1 overflow-x-auto" id="playerCards">
+                    <!-- Cards will be displayed here in UNO style -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Panel -->
+    <div id="questionPanel" class="panel">
+        <div class="panel-content">
+            <h2 id="questionZoneTitle" class="text-xl font-bold mb-4">Algorithm Zone</h2>
+            <p id="questionText" class="text-lg mb-6">Question will appear here</p>
+            <div class="grid grid-cols-2 gap-4">
+                <button class="answer-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-answer="a">A</button>
+                <button class="answer-btn bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-answer="b">B</button>
+                <button class="answer-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-answer="c">C</button>
+                <button class="answer-btn bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-answer="d">D</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Panel -->
+    <div id="actionPanel" class="panel">
+        <div class="panel-content">
+            <h2 class="text-xl font-bold mb-4">Choose Action</h2>
+            <div class="space-y-4">
+                <button class="action-btn w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-action="skip">
+                    Skip Next Player
+                </button>
+                <button class="action-btn w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-action="back">
+                    Go Back 2 Spaces
+                </button>
+                <button class="action-btn w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors" data-action="discard">
+                    Discard 1 Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Challenge Panel -->
+    <div id="challengePanel" class="panel">
+        <div class="panel-content">
+            <h2 class="text-xl font-bold mb-4">Choose Player to Challenge</h2>
+            <div id="challengePlayers" class="space-y-4">
+                <!-- Challenge options will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Selection Panel -->
+    <div id="cardSelectionPanel" class="panel">
+        <div class="panel-content">
+            <h2 id="cardSelectionTitle" class="text-xl font-bold mb-4">Choose Card</h2>
+            <div id="cardSelectionContainer" class="flex flex-wrap gap-4 justify-center">
+                <!-- Cards will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Epic Win Screen Modal -->
+    <div id="gameEndModal" class="fixed inset-0 win-screen flex items-center justify-center z-50 overflow-hidden" style="display: none;">
+        <!-- Confetti Container -->
+        <div id="confettiContainer" class="absolute inset-0 pointer-events-none"></div>
+        
+        <!-- Fireworks Container -->
+        <div id="fireworksContainer" class="absolute inset-0 pointer-events-none"></div>
+        
+        <!-- Main Win Content -->
+        <div class="bg-white bg-opacity-95 rounded-3xl p-12 max-w-2xl w-full mx-4 text-center shadow-2xl backdrop-blur-sm border-4 border-yellow-400 relative overflow-hidden">
+            <!-- Animated Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-4 left-4 text-6xl animate-spin" style="animation-duration: 8s;">⭐</div>
+                <div class="absolute top-4 right-4 text-6xl animate-spin" style="animation-duration: 6s; animation-direction: reverse;">✨</div>
+                <div class="absolute bottom-4 left-4 text-6xl animate-bounce" style="animation-delay: 1s;">🎉</div>
+                <div class="absolute bottom-4 right-4 text-6xl animate-bounce" style="animation-delay: 2s;">🎊</div>
+            </div>
+            
+            <!-- Victory Header -->
+            <div class="relative z-10">
+                <div class="text-8xl mb-6 animate-pulse">🏆</div>
+                <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+                    VICTORY!
+                </h1>
+                <div class="text-2xl font-bold text-gray-700 mb-2">🎮 Game Complete! 🎮</div>
+            </div>
+            
+            <!-- Winner Showcase -->
+            <div class="relative z-10 mb-8">
+                <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-2xl p-6 border-4 border-yellow-400 shadow-lg">
+                    <div class="text-8xl mb-4" id="winnerEmoji" style="animation: winCelebration 2s ease-in-out infinite;">🏆</div>
+                    <div class="text-4xl font-bold text-yellow-800 mb-2" id="winnerName">Champion</div>
+                    <div class="text-2xl text-yellow-700">Final Score: <span id="winnerScore" class="font-bold">0</span></div>
+                    <div class="text-lg text-yellow-600 mt-2" id="winnerReason">Highest Score!</div>
+                </div>
+            </div>
+            
+            <!-- Final Leaderboard -->
+            <div class="relative z-10 mb-8">
+                <h3 class="text-2xl font-bold mb-4 text-gray-800">🏅 Final Leaderboard 🏅</h3>
+                <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex items-center justify-between p-3 bg-yellow-100 rounded-lg border-2 border-yellow-300">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🥇</span>
+                                <span class="font-bold" id="leaderboard1Name">Player 1</span>
+                            </div>
+                            <span class="text-xl font-bold text-yellow-600" id="leaderboard1Score">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-100 rounded-lg border-2 border-gray-300">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🥈</span>
+                                <span class="font-bold" id="leaderboard2Name">Player 2</span>
+                            </div>
+                            <span class="text-xl font-bold text-gray-600" id="leaderboard2Score">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-orange-100 rounded-lg border-2 border-orange-300">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🥉</span>
+                                <span class="font-bold" id="leaderboard3Name">Player 3</span>
+                            </div>
+                            <span class="text-xl font-bold text-orange-600" id="leaderboard3Score">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-red-100 rounded-lg border-2 border-red-300">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">4️⃣</span>
+                                <span class="font-bold" id="leaderboard4Name">Player 4</span>
+                            </div>
+                            <span class="text-xl font-bold text-red-600" id="leaderboard4Score">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="relative z-10 space-y-4">
+                <button id="playAgainBtn" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl transition-all transform hover:scale-105 shadow-lg border-2 border-green-400">
+                    <span class="flex items-center justify-center gap-3">
+                        <span class="text-2xl">🔄</span>
+                        <span>Play Again</span>
+                        <span class="text-2xl">🎮</span>
+                    </span>
+                </button>
+                <button id="backToMainMenuBtn" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg border-2 border-blue-400">
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">🏠</span>
+                        <span>Main Menu</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const mainMenu = document.getElementById('mainMenu');
+        const searchingScreen = document.getElementById('searchingScreen');
+        const characterSelection = document.getElementById('characterSelection');
+        const howToPlayModal = document.getElementById('howToPlayModal');
+        const gameBoard = document.getElementById('gameBoard');
+        const playOnlineBtn = document.getElementById('playOnlineBtn');
+        const playWithAIBtn = document.getElementById('playWithAIBtn');
+        const howToPlayBtn = document.getElementById('howToPlayBtn');
+        const backToMenuBtn = document.getElementById('backToMenuBtn');
+        const closeGuideBtn = document.getElementById('closeGuideBtn');
+        const cancelSearchBtn = document.getElementById('cancelSearchBtn');
+        const playersFound = document.getElementById('playersFound');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const rollDiceBtn = document.getElementById('rollDiceBtn');
+        const specialAbilityBtn = document.getElementById('specialAbilityBtn');
+        const useCardBtn = document.getElementById('useCardBtn');
+        const dice1 = document.getElementById('dice1');
+        const dice2 = document.getElementById('dice2');
+        const roundCounter = document.getElementById('roundCounter');
+        const playerCharacterEmoji = document.getElementById('playerCharacterEmoji');
+        const playerName = document.getElementById('playerName');
+        const playerCharacterName = document.getElementById('playerCharacterName');
+        const abilityDescription = document.getElementById('abilityDescription');
+        const playerCards = document.getElementById('playerCards');
+        
+        // Panel elements
+        const questionPanel = document.getElementById('questionPanel');
+        const actionPanel = document.getElementById('actionPanel');
+        const challengePanel = document.getElementById('challengePanel');
+        const cardSelectionPanel = document.getElementById('cardSelectionPanel');
+        const gameEndModal = document.getElementById('gameEndModal');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        
+        // Question panel elements
+        const questionZoneTitle = document.getElementById('questionZoneTitle');
+        const questionText = document.getElementById('questionText');
+        const answerBtns = document.querySelectorAll('.answer-btn');
+        
+        // Action panel elements
+        const actionBtns = document.querySelectorAll('.action-btn');
+        
+        // Challenge panel elements
+        const challengePlayers = document.getElementById('challengePlayers');
+        
+        // Card selection elements
+        const cardSelectionTitle = document.getElementById('cardSelectionTitle');
+        const cardSelectionContainer = document.getElementById('cardSelectionContainer');
+
+        // Game state
+        const gameState = {
+            players: [
+                { id: 1, name: "You", character: null, emoji: "", color: "#FF6B6B", position: 0, score: 0, cards: [], shieldCards: [], abilityUsed: 0, abilityMaxUses: 0, abilityFrequency: 0, abilityActive: false, isAI: false, usedCardThisTurn: false },
+                { id: 2, name: "Player 2", character: null, emoji: "", color: "#4ECDC4", position: 0, score: 0, cards: [], shieldCards: [], abilityUsed: 0, abilityMaxUses: 0, abilityFrequency: 0, abilityActive: false, isAI: true, usedCardThisTurn: false },
+                { id: 3, name: "Player 3", character: null, emoji: "", color: "#45B7D1", position: 0, score: 0, cards: [], shieldCards: [], abilityUsed: 0, abilityMaxUses: 0, abilityFrequency: 0, abilityActive: false, isAI: true, usedCardThisTurn: false },
+                { id: 4, name: "Player 4", character: null, emoji: "", color: "#96CEB4", position: 0, score: 0, cards: [], shieldCards: [], abilityUsed: 0, abilityMaxUses: 0, abilityFrequency: 0, abilityActive: false, isAI: true, usedCardThisTurn: false }
+            ],
+            selectedCharacter: null,
+            selectedCharacters: [], // Track all selected characters
+            currentPlayerIndex: 0,
+            currentRound: 1,
+            totalRounds: 20,
+            gameStarted: false,
+            diceRolling: false,
+            movementInProgress: false,
+            boardCells: [],
+            activePanel: null,
+            hasWinCard: false,
+            winCardPlayer: null,
+            waitingForAction: false,
+            gameMode: null, // 'online' or 'ai'
+            playersInGame: 4,
+            questionTimer: null,
+            actionTimer: null,
+            currentTimerSeconds: 0,
+            sabotageWindowOpen: false
+        };
+
+        // Board cell definitions (24 cells in a circle) - Fixed layout
+        const boardCellDefinitions = [];
+        
+        // Generate circular board positions with fixed symbols
+        function generateCircularBoard() {
+            const centerX = 192; // Center of the 384px (w-96) board
+            const centerY = 192;
+            const radius = 140; // Smaller radius to fit better in the circular board
+            const totalCells = 24;
+            
+            // Fixed symbol pattern for consistent gameplay
+            // Pattern: Start, then 6 cells per zone (Pattern-top-left, Abstraction-top-right, Algorithm-bottom-right, Decomposition-bottom-left)
+            const fixedLayout = [
+                { symbol: "🏠", zone: "start" }, // 0 - Start
+                // Abstraction zone (top-left, positions 1-6)
+                { symbol: "🧩", zone: "abstraction" }, // 1
+                { symbol: "❌", zone: "abstraction" }, // 2
+                { symbol: "🧩", zone: "abstraction" }, // 3
+                { symbol: "⚔️", zone: "abstraction" }, // 4
+                { symbol: "🧩", zone: "abstraction" }, // 5
+                { symbol: "🛡️", zone: "abstraction" }, // 6
+                // Algorithm zone (top-right, positions 7-12)
+                { symbol: "🧩", zone: "algorithm" }, // 7
+                { symbol: "❌", zone: "algorithm" }, // 8
+                { symbol: "🧩", zone: "algorithm" }, // 9
+                { symbol: "⚔️", zone: "algorithm" }, // 10
+                { symbol: "🧩", zone: "algorithm" }, // 11
+                { symbol: "🛡️", zone: "algorithm" }, // 12
+                // Decomposition zone (bottom-right, positions 13-18)
+                { symbol: "🧩", zone: "decomposition" }, // 13
+                { symbol: "❌", zone: "decomposition" }, // 14
+                { symbol: "🧩", zone: "decomposition" }, // 15
+                { symbol: "⚔️", zone: "decomposition" }, // 16
+                { symbol: "🧩", zone: "decomposition" }, // 17
+                { symbol: "🛡️", zone: "decomposition" }, // 18
+                // Pattern Recognition zone (bottom-left, positions 19-23)
+                { symbol: "🧩", zone: "pattern" }, // 19
+                { symbol: "❌", zone: "pattern" }, // 20
+                { symbol: "🧩", zone: "pattern" }, // 21
+                { symbol: "⚔️", zone: "pattern" }, // 22
+                { symbol: "🧩", zone: "pattern" } // 23
+            ];
+            
+            for (let i = 0; i < totalCells; i++) {
+                const angle = (i * 2 * Math.PI) / totalCells - Math.PI / 2; // Start from top
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                const cellData = fixedLayout[i];
+                
+                boardCellDefinitions.push({
+                    position: i,
+                    x: Math.round(x - 25), // Adjusted offset for smaller cells
+                    y: Math.round(y - 25),
+                    symbol: cellData.symbol,
+                    zone: cellData.zone
+                });
+            }
+        }
+        
+        // Initialize circular board
+        generateCircularBoard();
+
+        // Question banks
+        const questionBanks = {
+            algorithm: [
+                {
+                    question: "What is an algorithm?",
+                    options: ["a) A set of ordered instructions", "b) A programming language", "c) A variable", "d) A function"],
+                    answer: "a"
+                },
+                {
+                    question: "What is the first step in writing an algorithm?",
+                    options: ["a) Write code", "b) Analyze the problem", "c) Test", "d) Debug"],
+                    answer: "b"
+                }
+            ],
+            pattern: [
+                {
+                    question: "What is Pattern Recognition?",
+                    options: ["a) Finding similarities", "b) Problem solving", "c) Writing code", "d) Testing"],
+                    answer: "a"
+                },
+                {
+                    question: "In the sequence 2, 4, 6, 8, ? what comes next?",
+                    options: ["a) 9", "b) 10", "c) 11", "d) 12"],
+                    answer: "b"
+                }
+            ],
+            abstraction: [
+                {
+                    question: "What is Abstraction?",
+                    options: ["a) Hiding details", "b) Showing everything", "c) Writing code", "d) Testing"],
+                    answer: "a"
+                },
+                {
+                    question: "Which is an example of abstraction?",
+                    options: ["a) A map", "b) A photo", "c) Text", "d) Sound"],
+                    answer: "a"
+                }
+            ],
+            decomposition: [
+                {
+                    question: "What is Decomposition?",
+                    options: ["a) Breaking big problems into smaller ones", "b) Combining problems", "c) Deleting problems", "d) Adding problems"],
+                    answer: "a"
+                },
+                {
+                    question: "What is the benefit of decomposition?",
+                    options: ["a) Makes it complex", "b) Makes it easier", "c) Makes it harder", "d) No benefit"],
+                    answer: "b"
+                }
+            ]
+        };
+
+        // Card definitions
+        const normalCards = [
+            { name: "Re-roll", description: "Roll dice again", emoji: "🎲", color: "#FFE4B5" },
+            { name: "Move Back", description: "Choose player to go back 3 spaces", emoji: "↩️", color: "#FFB6C1" },
+            { name: "Bonus Points", description: "+3 points to next dice roll", emoji: "➕", color: "#98FB98" },
+            { name: "Skip Turn", description: "Skip next player's turn", emoji: "⏭️", color: "#87CEEB" },
+            { name: "Time Sabotage", description: "Reduce opponent's timer by 15 seconds", emoji: "⏰", color: "#FF6B6B", type: "sabotage" },
+            { name: "Confusion", description: "Scramble opponent's answer options", emoji: "🌀", color: "#DDA0DD", type: "sabotage" },
+            { name: "Win Card", description: "Win the game instantly!", emoji: "🏆", color: "#FFD700" }
+        ];
+
+        const shieldCards = [
+            { name: "Defense Shield", description: "Prevent going back 1 time", emoji: "🛡️", color: "#C0C0C0" },
+            { name: "Reflect Shield", description: "Reflect attack back", emoji: "🔄", color: "#DDA0DD" },
+            { name: "Magic Shield", description: "Prevent special cards", emoji: "✨", color: "#F0E68C" }
+        ];
+
+        // Menu navigation
+        playOnlineBtn.addEventListener('click', () => {
+            gameState.gameMode = 'online';
+            mainMenu.classList.add('hidden');
+            searchingScreen.classList.remove('hidden');
+            simulatePlayerSearch();
+        });
+
+        playWithAIBtn.addEventListener('click', () => {
+            gameState.gameMode = 'ai';
+            mainMenu.classList.add('hidden');
+            characterSelection.classList.remove('hidden');
+        });
+
+        howToPlayBtn.addEventListener('click', () => {
+            howToPlayModal.classList.remove('opacity-0', 'invisible');
+            howToPlayModal.querySelector('.bg-white').classList.remove('scale-90');
+            howToPlayModal.querySelector('.bg-white').classList.add('scale-100');
+        });
+
+        backToMenuBtn.addEventListener('click', () => {
+            closeHowToPlayModal();
+        });
+
+        closeGuideBtn.addEventListener('click', () => {
+            closeHowToPlayModal();
+        });
+
+        // Close modal when clicking outside
+        howToPlayModal.addEventListener('click', (e) => {
+            if (e.target === howToPlayModal) {
+                closeHowToPlayModal();
+            }
+        });
+
+        function closeHowToPlayModal() {
+            howToPlayModal.querySelector('.bg-white').classList.remove('scale-100');
+            howToPlayModal.querySelector('.bg-white').classList.add('scale-90');
+            setTimeout(() => {
+                howToPlayModal.classList.add('opacity-0', 'invisible');
+            }, 150);
+        }
+
+        cancelSearchBtn.addEventListener('click', () => {
+            searchingScreen.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+        });
+
+        // Simulate finding players
+        function simulatePlayerSearch() {
+            let foundPlayers = 1;
+            const searchInterval = setInterval(() => {
+                foundPlayers++;
+                playersFound.textContent = `${foundPlayers}/4`;
+                
+                if (foundPlayers >= 4) {
+                    clearInterval(searchInterval);
+                    setTimeout(() => {
+                        searchingScreen.classList.add('hidden');
+                        characterSelection.classList.remove('hidden');
+                    }, 1000);
+                }
+            }, Math.random() * 2000 + 1000); // Random delay between 1-3 seconds
+        }
+
+        // Character selection with availability tracking
+        document.querySelectorAll('.character-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const character = this.getAttribute('data-character');
+                
+                // Check if character is already taken
+                if (gameState.selectedCharacters.includes(character)) {
+                    showAlert("❌ This character is already taken by another player!", "error");
+                    return;
+                }
+                
+                // Remove previous selection if any
+                if (gameState.selectedCharacter) {
+                    const prevIndex = gameState.selectedCharacters.indexOf(gameState.selectedCharacter);
+                    if (prevIndex > -1) {
+                        gameState.selectedCharacters.splice(prevIndex, 1);
+                    }
+                }
+                
+                // Remove selection from all options
+                document.querySelectorAll('.character-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.style.borderColor = 'transparent';
+                    opt.style.opacity = '1';
+                });
+                
+                // Select this option
+                this.classList.add('selected');
+                this.style.borderColor = '#8B5CF6';
+                this.style.borderWidth = '3px';
+                gameState.selectedCharacter = character;
+                gameState.selectedCharacters.push(character);
+                
+                // Mark unavailable characters as taken
+                updateCharacterAvailability();
+                
+                // Enable start button
+                startGameBtn.disabled = false;
+            });
+        });
+        
+        // Update character availability display
+        function updateCharacterAvailability() {
+            // Simulate other players selecting characters
+            const allCharacters = ['frog', 'cat', 'rabbit', 'duck'];
+            const availableCharacters = allCharacters.filter(char => !gameState.selectedCharacters.includes(char));
+            
+            // Randomly assign 2 more characters to AI players (simulating online selection)
+            if (gameState.gameMode === 'online' && gameState.selectedCharacters.length === 1) {
+                const aiSelections = [];
+                while (aiSelections.length < 2 && availableCharacters.length > aiSelections.length) {
+                    const randomChar = availableCharacters[Math.floor(Math.random() * availableCharacters.length)];
+                    if (!aiSelections.includes(randomChar)) {
+                        aiSelections.push(randomChar);
+                        gameState.selectedCharacters.push(randomChar);
+                    }
+                }
+            }
+            
+            // Update visual state of character options
+            document.querySelectorAll('.character-option').forEach(option => {
+                const character = option.getAttribute('data-character');
+                if (gameState.selectedCharacters.includes(character) && character !== gameState.selectedCharacter) {
+                    option.style.opacity = '0.5';
+                    option.style.cursor = 'not-allowed';
+                    
+                    // Add "TAKEN" overlay
+                    if (!option.querySelector('.taken-overlay')) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'taken-overlay absolute inset-0 bg-red-500 bg-opacity-75 flex items-center justify-center text-white font-bold text-lg rounded-lg';
+                        overlay.textContent = 'TAKEN';
+                        option.style.position = 'relative';
+                        option.appendChild(overlay);
+                    }
+                } else if (character !== gameState.selectedCharacter) {
+                    option.style.opacity = '1';
+                    option.style.cursor = 'pointer';
+                    
+                    // Remove "TAKEN" overlay if it exists
+                    const overlay = option.querySelector('.taken-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                }
+            });
+        }
+
+        // Create board cells and zone borders
+        function createBoardCells() {
+            const gameBoard = document.querySelector('.game-board');
+            gameState.boardCells = [];
+            
+            // Create zone borders and labels first
+            createZoneBorders(gameBoard);
+            
+            boardCellDefinitions.forEach(cellDef => {
+                const cell = document.createElement('div');
+                cell.classList.add('board-cell', cellDef.zone);
+                cell.style.left = `${cellDef.x}px`;
+                cell.style.top = `${cellDef.y}px`;
+                cell.textContent = cellDef.symbol;
+                cell.title = `Position ${cellDef.position} - ${cellDef.zone}`;
+                
+                gameBoard.appendChild(cell);
+                
+                gameState.boardCells.push({
+                    position: cellDef.position,
+                    x: cellDef.x,
+                    y: cellDef.y,
+                    symbol: cellDef.symbol,
+                    zone: cellDef.zone,
+                    element: cell
+                });
+            });
+        }
+
+        // Create zone borders and labels
+        function createZoneBorders(gameBoard) {
+            const centerX = 192;
+            const centerY = 192;
+            const radius = 160;
+            
+            // Zone definitions - Fixed positions and colors to match the swapped layout
+            const zones = [
+                { name: "Abstraction", class: "abstraction", color: "#EC4899", startAngle: -90, endAngle: 0 }, // Top-left
+                { name: "Algorithm", class: "algorithm", color: "#F59E0B", startAngle: 0, endAngle: 90 }, // Top-right  
+                { name: "Decomposition", class: "decomposition", color: "#EA580C", startAngle: 90, endAngle: 180 }, // Bottom-right
+                { name: "Pattern Recognition", class: "pattern", color: "#3B82F6", startAngle: 180, endAngle: 270 } // Bottom-left
+            ];
+            
+            zones.forEach((zone, index) => {
+                // Create zone border (quarter circle)
+                const border = document.createElement('div');
+                border.className = `zone-border ${zone.class}-zone`;
+                
+                // Calculate border position and size
+                const borderSize = radius * 2 + 80; // Slightly larger than the cell circle
+                border.style.width = `${borderSize}px`;
+                border.style.height = `${borderSize}px`;
+                border.style.left = `${centerX - borderSize/2}px`;
+                border.style.top = `${centerY - borderSize/2}px`;
+                border.style.borderColor = zone.color;
+                
+                // Create a clip path for quarter circle
+                const startAngleRad = (zone.startAngle * Math.PI) / 180;
+                const endAngleRad = (zone.endAngle * Math.PI) / 180;
+                
+                // Use CSS to create quarter circle effect
+                border.style.background = `conic-gradient(from ${zone.startAngle}deg, ${zone.color}20 0deg, ${zone.color}20 90deg, transparent 90deg)`;
+                border.style.borderRadius = '50%';
+                border.style.border = 'none';
+                
+                gameBoard.appendChild(border);
+                
+                // Create zone label
+                const label = document.createElement('div');
+                label.className = `zone-label ${zone.class}-label`;
+                label.textContent = zone.name;
+                
+                // Position label at the middle of the zone arc
+                const labelAngle = (zone.startAngle + 45) * Math.PI / 180; // Middle of 90-degree arc
+                const labelRadius = radius + 50; // Outside the cells
+                const labelX = centerX + labelRadius * Math.cos(labelAngle);
+                const labelY = centerY + labelRadius * Math.sin(labelAngle);
+                
+                label.style.left = `${labelX - 40}px`; // Offset for label width
+                label.style.top = `${labelY - 10}px`; // Offset for label height
+                
+                gameBoard.appendChild(label);
+            });
+        }
+
+        // Start game
+        startGameBtn.addEventListener('click', () => {
+            if (gameState.selectedCharacter) {
+                // Initialize player character
+                gameState.players[0].character = gameState.selectedCharacter;
+                
+                // Assign remaining characters to AI players
+                const availableCharacters = ['frog', 'cat', 'rabbit', 'duck'].filter(char => !gameState.selectedCharacters.includes(char));
+                
+                // Add any characters that were marked as taken by other players
+                const takenByOthers = gameState.selectedCharacters.filter(char => char !== gameState.selectedCharacter);
+                
+                // Assign characters to AI players
+                let aiCharacterIndex = 0;
+                for (let i = 1; i < 4; i++) {
+                    if (aiCharacterIndex < takenByOthers.length) {
+                        // Assign characters that were "taken" by other players
+                        gameState.players[i].character = takenByOthers[aiCharacterIndex];
+                        aiCharacterIndex++;
+                    } else if (availableCharacters.length > 0) {
+                        // Assign remaining available characters
+                        const randomIndex = Math.floor(Math.random() * availableCharacters.length);
+                        gameState.players[i].character = availableCharacters.splice(randomIndex, 1)[0];
+                    }
+                }
+                
+                // Set character properties for all players
+                gameState.players.forEach(player => {
+                    switch (player.character) {
+                        case 'frog':
+                            player.emoji = "🐸";
+                            player.abilityMaxUses = 2;
+                            player.abilityFrequency = 4;
+                            break;
+                        case 'cat':
+                            player.emoji = "🐱";
+                            player.abilityMaxUses = 2;
+                            player.abilityFrequency = 4;
+                            break;
+                        case 'rabbit':
+                            player.emoji = "🐰";
+                            player.abilityMaxUses = 2;
+                            player.abilityFrequency = 5;
+                            break;
+                        case 'duck':
+                            player.emoji = "🦆";
+                            player.abilityMaxUses = 4;
+                            player.abilityFrequency = 3;
+                            break;
+                    }
+                });
+                
+                // Create board cells
+                createBoardCells();
+                
+                // Deal initial cards
+                dealInitialCards();
+                
+                // Hide setup, show game board
+                characterSelection.classList.add('hidden');
+                gameBoard.classList.remove('hidden');
+                
+                // Initialize game
+                gameState.gameStarted = true;
+                updateGameDisplay();
+                
+                // Create player tokens on board
+                createPlayerTokens();
+            }
+        });
+
+        // Create player tokens on the board
+        function createPlayerTokens() {
+            // Remove any existing tokens
+            const existingTokens = document.querySelectorAll('.player-token');
+            existingTokens.forEach(token => token.remove());
+            
+            // Create new tokens for all 4 players
+            gameState.players.forEach((player, index) => {
+                const token = document.createElement('div');
+                token.classList.add('player-token');
+                token.id = `player-token-${player.id}`;
+                token.style.backgroundColor = player.color;
+                token.innerHTML = player.emoji;
+                
+                // Position token on starting cell
+                const startCell = gameState.boardCells.find(cell => cell.position === 0);
+                if (startCell) {
+                    token.style.left = `${startCell.x + 15 + (index * 5)}px`;
+                    token.style.top = `${startCell.y + 15 + (index * 5)}px`;
+                    document.querySelector('.game-board').appendChild(token);
+                }
+            });
+        }
+
+        // Move player token on the board step by step
+        function movePlayerToken(playerId, newPosition) {
+            if (gameState.movementInProgress) return;
+            
+            const token = document.getElementById(`player-token-${playerId}`);
+            if (!token) return;
+            
+            const player = gameState.players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            const currentPosition = player.position;
+            const boardLength = boardCellDefinitions.length;
+            
+            // Calculate steps needed (considering board wrap-around)
+            let steps;
+            if (newPosition >= currentPosition) {
+                steps = newPosition - currentPosition;
+            } else {
+                // Moving past position 23 back to lower positions
+                steps = (boardLength - currentPosition) + newPosition;
+            }
+            
+            // If no movement needed
+            if (steps === 0) {
+                handleCellAction(newPosition);
+                return;
+            }
+
+            gameState.movementInProgress = true;
+            
+            // Animate movement step by step
+            let currentStep = 0;
+            const moveInterval = setInterval(() => {
+                currentStep++;
+
+                // Calculate next position (with wrap-around)
+                const nextPosition = (currentPosition + currentStep) % boardLength;
+                
+                // Get cell for this position
+                const cell = gameState.boardCells.find(cell => cell.position === nextPosition);
+                if (!cell) {
+                    clearInterval(moveInterval);
+                    gameState.movementInProgress = false;
+                    return;
+                }
+                
+                // Highlight the cell being moved to
+                highlightCell(cell.element);
+                
+                // Count how many players are on this cell
+                const playersOnCell = gameState.players.filter(p => p.position === nextPosition).length;
+                
+                // Move token to this position
+                token.style.transition = 'all 0.4s ease';
+                token.style.left = `${cell.x + 15 + (playersOnCell * 5)}px`;
+                token.style.top = `${cell.y + 15 + (playersOnCell * 5)}px`;
+                
+                // Add move indicator
+                addMoveIndicator(cell.x + 30, cell.y + 30);
+                
+                // Play move sound
+                try {
+                    playSound('move');
+                } catch (e) {
+                    // Ignore audio errors
+                }
+                
+                // If this is the final step
+                if (currentStep === steps) {
+                    clearInterval(moveInterval);
+                    
+                    // Update player position in game state
+                    player.position = newPosition;
+                    
+                    // Wait a moment before handling the cell action
+                    setTimeout(() => {
+                        gameState.movementInProgress = false;
+                        handleCellAction(newPosition);
+                    }, 500);
+                }
+            }, 500); // Move every 500ms
+        }
+        
+        // Highlight a cell briefly
+        function highlightCell(cellElement) {
+            cellElement.classList.add('highlight-cell');
+            setTimeout(() => {
+                cellElement.classList.remove('highlight-cell');
+            }, 500);
+        }
+        
+        // Add move indicator (small dot that appears briefly)
+        function addMoveIndicator(x, y) {
+            const indicator = document.createElement('div');
+            indicator.classList.add('move-indicator');
+            indicator.style.left = `${x - 10}px`; // Center the indicator
+            indicator.style.top = `${y - 10}px`;
+            
+            document.querySelector('.game-board').appendChild(indicator);
+            
+            // Remove after animation
+            setTimeout(() => {
+                indicator.remove();
+            }, 400);
+        }
+
+        // Move player back step by step
+        function movePlayerBack(steps) {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            let newPosition = currentPlayer.position - steps;
+            
+            // Ensure position doesn't go negative
+            if (newPosition < 0) newPosition = 0;
+            
+            // Store the original position
+            const originalPosition = currentPlayer.position;
+            
+            // Update position in game state
+            currentPlayer.position = newPosition;
+            
+            // Move token step by step
+            movePlayerTokenBackward(currentPlayer.id, originalPosition, newPosition);
+        }
+        
+        // Move player token backward step by step
+        function movePlayerTokenBackward(playerId, fromPosition, toPosition) {
+            if (gameState.movementInProgress) return;
+            
+            const token = document.getElementById(`player-token-${playerId}`);
+            if (!token) return;
+            
+            // If no movement needed
+            if (fromPosition === toPosition) return;
+            
+            gameState.movementInProgress = true;
+
+            // Calculate steps needed
+            const steps = fromPosition - toPosition;
+            
+            // Animate movement step by step
+            let currentStep = 0;
+            const moveInterval = setInterval(() => {
+                currentStep++;
+                
+                // Calculate next position
+                const nextPosition = fromPosition - currentStep;
+                
+                // Get cell for this position
+                const cell = gameState.boardCells.find(cell => cell.position === nextPosition);
+                if (!cell) {
+                    clearInterval(moveInterval);
+                    gameState.movementInProgress = false;
+                    return;
+                }
+                
+                // Highlight the cell being moved to
+                highlightCell(cell.element);
+                
+                // Count how many players are on this cell
+                const playersOnCell = gameState.players.filter(p => p.position === nextPosition).length;
+                
+                // Move token to this position
+                token.style.transition = 'all 0.4s ease';
+                token.style.left = `${cell.x + 15 + (playersOnCell * 5)}px`;
+                token.style.top = `${cell.y + 15 + (playersOnCell * 5)}px`;
+                
+                // Add move indicator
+                addMoveIndicator(cell.x + 30, cell.y + 30);
+                
+                // Play move sound
+                try {
+                    playSound('move');
+                } catch (e) {
+                    // Ignore audio errors
+                }
+                
+                // If this is the final step
+                if (currentStep === steps) {
+                    clearInterval(moveInterval);
+                    gameState.movementInProgress = false;
+                }
+            }, 500); // Move every 500ms
+        }
+
+        // Deal initial cards
+        function dealInitialCards() {
+            // Shuffle decks
+            const shuffledNormalCards = [...normalCards].sort(() => Math.random() - 0.5);
+            const shuffledShieldCards = [...shieldCards].sort(() => Math.random() - 0.5);
+            
+            // Deal cards to each player
+            gameState.players.forEach((player, index) => {
+                if (index < gameState.selectedCharacters.length) {
+                    // 2 normal cards
+                    player.cards.push(shuffledNormalCards.pop());
+                    player.cards.push(shuffledNormalCards.pop());
+                    
+                    // 1 shield card
+                    player.shieldCards.push(shuffledShieldCards.pop());
+                }
+            });
+            
+            // Add Win Card to the deck (somewhere in the middle)
+            const winCardIndex = Math.floor(Math.random() * shuffledNormalCards.length / 2) + Math.floor(shuffledNormalCards.length / 3);
+            shuffledNormalCards.splice(winCardIndex, 0, normalCards.find(card => card.name === "Win Card"));
+        }
+
+        // Roll dice
+        rollDiceBtn.addEventListener('click', () => {
+            if (!gameState.diceRolling && !gameState.movementInProgress && !gameState.waitingForAction) {
+                gameState.diceRolling = true;
+                rollDiceBtn.disabled = true;
+                
+                // Play dice sound
+                try {
+                    playSound('dice');
+                } catch (e) {
+                    // Ignore audio errors
+                }
+                
+                // Visual dice rolling effect
+                dice1.classList.add('dice-rolling');
+                dice2.classList.add('dice-rolling');
+                
+                setTimeout(() => {
+                    // Generate random dice values
+                    const diceValue1 = Math.floor(Math.random() * 6) + 1;
+                    const diceValue2 = Math.floor(Math.random() * 6) + 1;
+                    
+                    // Update dice display
+                    dice1.textContent = diceValue1;
+                    dice2.textContent = diceValue2;
+                    
+                    // Remove rolling animation
+                    dice1.classList.remove('dice-rolling');
+                    dice2.classList.remove('dice-rolling');
+                    
+                    // Move player
+                    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+                    let totalSteps = diceValue1 + diceValue2;
+
+                    // Apply rabbit ability if active
+                    if (currentPlayer.character === 'rabbit' && currentPlayer.abilityActive) {
+                        totalSteps += 5;
+                        currentPlayer.abilityActive = false;
+                        currentPlayer.abilityUsed++;
+                    }
+                    
+                    // Calculate new position (wrap around the board)
+                    const newPosition = (currentPlayer.position + totalSteps) % boardCellDefinitions.length;
+                    
+                    // Move token on board step by step
+                    movePlayerToken(currentPlayer.id, newPosition);
+                    
+                    gameState.diceRolling = false;
+                    rollDiceBtn.disabled = false;
+                }, 1000);
+            }
+        });
+
+        // Handle cell action
+        function handleCellAction(position) {
+            const cell = gameState.boardCells.find(cell => cell.position === position);
+            if (!cell) return;
+            
+            const symbol = cell.symbol;
+            const zone = cell.zone;
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            // Handle different symbols
+            switch (symbol) {
+                case "🧩": // Puzzle
+                    if (currentPlayer.isAI) {
+                        handleAIQuestion(zone);
+                    } else {
+                        gameState.waitingForAction = true;
+                        rollDiceBtn.disabled = true;
+                        rollDiceBtn.classList.add('opacity-50');
+                        showQuestion(zone);
+                    }
+                    break;
+                case "❌": // Cross
+                    if (currentPlayer.isAI) {
+                        handleAIAction();
+                    } else {
+                        gameState.waitingForAction = true;
+                        rollDiceBtn.disabled = true;
+                        rollDiceBtn.classList.add('opacity-50');
+                        showActionPanel();
+                    }
+                    break;
+                case "⚔️": // Challenge
+                    // Play challenge sound
+                    try {
+                        playSound('challenge');
+                    } catch (e) {
+                        // Ignore audio errors
+                    }
+                    
+                    if (currentPlayer.isAI) {
+                        handleAIChallenge();
+                    } else {
+                        gameState.waitingForAction = true;
+                        rollDiceBtn.disabled = true;
+                        rollDiceBtn.classList.add('opacity-50');
+                        showChallengePanel();
+                    }
+                    break;
+                case "🛡️": // Shield
+                    drawShieldCard();
+                    if (currentPlayer.isAI) {
+                        showAlert(`🛡️ ${currentPlayer.name} got a shield card!`, "success");
+                    }
+                    nextPlayer();
+                    break;
+                default:
+                    nextPlayer();
+                    break;
+            }
+        }
+
+        // Show/hide panels
+        function showPanel(panel) {
+            // Hide any active panel first
+            if (gameState.activePanel) {
+                gameState.activePanel.classList.remove('active');
+            }
+            
+            // Show the new panel
+            panel.classList.add('active');
+            gameState.activePanel = panel;
+        }
+
+        function hidePanel(panel) {
+            panel.classList.remove('active');
+            gameState.activePanel = null;
+            
+            // Re-enable dice rolling
+            gameState.waitingForAction = false;
+            rollDiceBtn.disabled = false;
+            rollDiceBtn.classList.remove('opacity-50');
+        }
+
+        // Show question panel
+        function showQuestion(zone) {
+            // Set zone title and color
+            switch (zone) {
+                case "algorithm":
+                    questionZoneTitle.textContent = "Algorithm Zone";
+                    questionZoneTitle.className = "text-xl font-bold text-yellow-600";
+                    break;
+                case "pattern":
+                    questionZoneTitle.textContent = "Pattern Recognition Zone";
+                    questionZoneTitle.className = "text-xl font-bold text-blue-600";
+                    break;
+                case "abstraction":
+                    questionZoneTitle.textContent = "Abstraction Zone";
+                    questionZoneTitle.className = "text-xl font-bold text-pink-600";
+                    break;
+                case "decomposition":
+                    questionZoneTitle.textContent = "Decomposition Zone";
+                    questionZoneTitle.className = "text-xl font-bold text-orange-600";
+                    break;
+            }
+            
+            // Get random question from the zone
+            const questions = questionBanks[zone];
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            const question = questions[randomIndex];
+
+            // Set question and options
+            questionText.textContent = question.question;
+            answerBtns.forEach((btn, index) => {
+                btn.textContent = question.options[index];
+                btn.setAttribute('data-answer', question.options[index].charAt(0).toLowerCase());
+                
+                // Add event listener for this question
+                btn.onclick = function() {
+                    const selectedAnswer = this.getAttribute('data-answer');
+                    clearTimeout(gameState.questionTimer);
+                    handleAnswer(selectedAnswer === question.answer, zone);
+                };
+            });
+            
+            // Add timer for questions (30 seconds)
+            startQuestionTimer(30, zone);
+            
+            // Show panel
+            showPanel(questionPanel);
+        }
+
+        // Handle answer
+        function handleAnswer(isCorrect, zone) {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            // Hide question panel
+            hidePanel(questionPanel);
+            
+            if (isCorrect) {
+                // Correct answer
+                currentPlayer.score++;
+                drawNormalCard();
+                showAlert("🎉 Awesome! Correct answer! You got a card!", "success");
+            } else {
+                // Wrong answer
+                movePlayerBack(2);
+                showAlert("😅 Oops! Wrong answer! Go back 2 spaces!", "error");
+            }
+            
+            // Move to next player
+            nextPlayer();
+        }
+
+        // Sound effects system
+        function playSound(type) {
+            // Create audio context for sound generation
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            switch (type) {
+                case 'dice':
+                    // Dice roll sound - quick rattle
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            oscillator.frequency.setValueAtTime(200 + Math.random() * 100, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                            oscillator.start();
+                            oscillator.stop(audioContext.currentTime + 0.1);
+                        }, i * 50);
+                    }
+                    break;
+                case 'success':
+                    // Success sound - ascending notes
+                    [261.63, 329.63, 392.00].forEach((freq, i) => {
+                        setTimeout(() => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                            oscillator.start();
+                            oscillator.stop(audioContext.currentTime + 0.3);
+                        }, i * 100);
+                    });
+                    break;
+                case 'error':
+                    // Error sound - descending buzz
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.5);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    break;
+                case 'challenge':
+                    // Challenge sound - battle horn
+                    const osc1 = audioContext.createOscillator();
+                    const gain1 = audioContext.createGain();
+                    osc1.connect(gain1);
+                    gain1.connect(audioContext.destination);
+                    osc1.frequency.setValueAtTime(220, audioContext.currentTime);
+                    osc1.frequency.setValueAtTime(330, audioContext.currentTime + 0.2);
+                    gain1.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    osc1.start();
+                    osc1.stop(audioContext.currentTime + 0.4);
+                    break;
+                case 'move':
+                    // Move sound - quick blip
+                    const moveOsc = audioContext.createOscillator();
+                    const moveGain = audioContext.createGain();
+                    moveOsc.connect(moveGain);
+                    moveGain.connect(audioContext.destination);
+                    moveOsc.frequency.setValueAtTime(400, audioContext.currentTime);
+                    moveGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    moveGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    moveOsc.start();
+                    moveOsc.stop(audioContext.currentTime + 0.1);
+                    break;
+                case 'card':
+                    // Card sound - soft chime
+                    const cardOsc = audioContext.createOscillator();
+                    const cardGain = audioContext.createGain();
+                    cardOsc.connect(cardGain);
+                    cardGain.connect(audioContext.destination);
+                    cardOsc.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                    cardGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    cardGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    cardOsc.start();
+                    cardOsc.stop(audioContext.currentTime + 0.3);
+                    break;
+            }
+        }
+
+        // Show custom alert
+        function showAlert(message, type = "info") {
+            // Play sound effect
+            try {
+                playSound(type);
+            } catch (e) {
+                // Ignore audio errors
+            }
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 text-white font-bold text-lg transform transition-all duration-300 translate-x-full`;
+            
+            switch (type) {
+                case "success":
+                    alertDiv.classList.add('bg-green-500');
+                    break;
+                case "error":
+                    alertDiv.classList.add('bg-red-500');
+                    break;
+                case "warning":
+                    alertDiv.classList.add('bg-yellow-500');
+                    break;
+                default:
+                    alertDiv.classList.add('bg-blue-500');
+            }
+            
+            alertDiv.textContent = message;
+            document.body.appendChild(alertDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                alertDiv.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                alertDiv.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(alertDiv);
+                }, 300);
+            }, 3000);
+        }
+
+        // Show action panel
+        function showActionPanel() {
+            // Set up action buttons
+            actionBtns.forEach(btn => {
+                const action = btn.getAttribute('data-action');
+                
+                btn.onclick = function() {
+                    clearTimeout(gameState.actionTimer);
+                    handleAction(action);
+                    hidePanel(actionPanel);
+                };
+            });
+            
+            // Add timer for actions (30 seconds)
+            startActionTimer(30);
+            
+            // Show panel
+            showPanel(actionPanel);
+        }
+
+        // Handle action selection
+        function handleAction(action) {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            switch (action) {
+                case "skip":
+                    showAlert("⏭️ You chose to skip the next player!", "info");
+                    // Skip next player
+                    gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 2) % 4;
+                    break;
+                case "back":
+                    showAlert("⬅️ You chose to go back 2 spaces!", "warning");
+                    movePlayerBack(2);
+                    break;
+                case "discard":
+                    if (currentPlayer.cards.length > 0 || currentPlayer.shieldCards.length > 0) {
+                        showCardSelectionForDiscard();
+                        return; // Don't call nextPlayer() yet
+                    } else {
+                        showAlert("😅 No cards to discard! Go back 2 spaces!", "error");
+                        movePlayerBack(2);
+                    }
+                    break;
+            }
+            
+            nextPlayer();
+        }
+
+        // Show challenge panel
+        function showChallengePanel() {
+            challengePlayers.innerHTML = "";
+            
+            // Add other players to challenge
+            gameState.players.forEach((player, index) => {
+                if (index !== gameState.currentPlayerIndex) {
+                    const playerBtn = document.createElement('button');
+                    playerBtn.classList.add('w-full', 'bg-gradient-to-r', 'from-red-500', 'to-red-600', 'hover:from-red-600', 'hover:to-red-700', 'text-white', 'p-4', 'rounded-xl', 'transition-all', 'transform', 'hover:scale-105', 'shadow-lg', 'flex', 'items-center', 'gap-4', 'text-left', 'border-2', 'border-red-400');
+                    playerBtn.innerHTML = `
+                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-2xl border-2 border-white">${player.emoji}</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-lg">${player.name}</div>
+                            <div class="text-sm opacity-90">Score: ${player.score} | Cards: ${player.cards.length + player.shieldCards.length}</div>
+                        </div>
+                        <div class="text-3xl animate-pulse">⚔️</div>
+                    `;
+                    
+                    playerBtn.onclick = function() {
+                        challengePlayer(index);
+                        hidePanel(challengePanel);
+                    };
+
+                    challengePlayers.appendChild(playerBtn);
+                }
+            });
+            
+            // Show panel
+            showPanel(challengePanel);
+        }
+
+        // Challenge another player
+        function challengePlayer(opponentIndex) {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const opponent = gameState.players[opponentIndex];
+            
+            // Determine zone for question
+            const cell = gameState.boardCells.find(cell => cell.position === currentPlayer.position);
+            let zone = cell ? cell.zone : 'algorithm';
+            
+            // If on start space, use a random zone
+            if (zone === 'start') {
+                const zones = ['algorithm', 'pattern', 'abstraction', 'decomposition'];
+                zone = zones[Math.floor(Math.random() * zones.length)];
+            }
+            
+            // Get random question from the zone
+            const questions = questionBanks[zone];
+            if (!questions || questions.length === 0) {
+                // Fallback to algorithm questions if zone questions not found
+                const fallbackQuestions = questionBanks['algorithm'];
+                const randomIndex = Math.floor(Math.random() * fallbackQuestions.length);
+                const question = fallbackQuestions[randomIndex];
+                startTimedChallenge(question, 'algorithm', currentPlayer, opponent);
+            } else {
+                const randomIndex = Math.floor(Math.random() * questions.length);
+                const question = questions[randomIndex];
+                startTimedChallenge(question, zone, currentPlayer, opponent);
+            }
+        }
+        
+        // Start timed challenge between two players
+        function startTimedChallenge(question, zone, challenger, opponent) {
+            // Set up challenge question panel
+            questionZoneTitle.textContent = `⚔️ Challenge: ${zone.charAt(0).toUpperCase() + zone.slice(1)} Zone`;
+            questionZoneTitle.className = "text-xl font-bold text-red-600";
+            questionText.innerHTML = `
+                <div class="mb-4">
+                    <div class="text-lg font-bold">${challenger.emoji} ${challenger.name} vs ${opponent.emoji} ${opponent.name}</div>
+                    <div class="text-sm text-gray-600">First to answer correctly wins!</div>
+                </div>
+                <div class="text-lg">${question.question}</div>
+            `;
+            
+            let challengeAnswered = false;
+            let challengeTimer = 10; // 10 seconds to answer
+            
+            // Update answer buttons for challenge
+            answerBtns.forEach((btn, index) => {
+                btn.textContent = question.options[index];
+                btn.setAttribute('data-answer', question.options[index].charAt(0).toLowerCase());
+                
+                btn.onclick = function() {
+                    if (challengeAnswered) return;
+                    
+                    const selectedAnswer = this.getAttribute('data-answer');
+                    const isCorrect = selectedAnswer === question.answer;
+                    
+                    challengeAnswered = true;
+                    clearInterval(timerInterval);
+                    
+                    if (isCorrect) {
+                        // Player answered correctly first
+                        showAlert(`⚔️ Challenge won! You answered correctly first!`, "success");
+                        challenger.shieldCards.push(shieldCards[Math.floor(Math.random() * shieldCards.length)]);
+                        hidePanel(questionPanel);
+                        nextPlayer();
+                    } else {
+                        // Player answered incorrectly
+                        showAlert(`😔 Wrong answer! ${opponent.name} wins by default!`, "error");
+                        if (challenger.cards.length > 0 || challenger.shieldCards.length > 0) {
+                            hidePanel(questionPanel);
+                            showCardSelectionForDiscard();
+                        } else {
+                            movePlayerBack(2);
+                            hidePanel(questionPanel);
+                            nextPlayer();
+                        }
+                    }
+                };
+            });
+            
+            // Add timer display
+            const existingTimer = document.getElementById('challengeTimer');
+            if (existingTimer) {
+                existingTimer.remove();
+            }
+            
+            const timerDiv = document.createElement('div');
+            timerDiv.className = 'text-center mt-4 text-2xl font-bold text-red-600';
+            timerDiv.id = 'challengeTimer';
+            questionText.appendChild(timerDiv);
+            
+            // Start countdown timer
+            const timerInterval = setInterval(() => {
+                timerDiv.textContent = `⏰ ${challengeTimer}s`;
+                challengeTimer--;
+                
+                if (challengeTimer < 0) {
+                    clearInterval(timerInterval);
+                    if (!challengeAnswered) {
+                        challengeAnswered = true;
+                        
+                        // Simulate opponent answering (AI has 70% chance to be correct)
+                        const opponentCorrect = Math.random() < 0.7;
+                        
+                        if (opponentCorrect) {
+                            showAlert(`⏰ Time's up! ${opponent.name} answered correctly!`, "error");
+                            if (challenger.cards.length > 0 || challenger.shieldCards.length > 0) {
+                                hidePanel(questionPanel);
+                                showCardSelectionForDiscard();
+                            } else {
+                                movePlayerBack(2);
+                                hidePanel(questionPanel);
+                                nextPlayer();
+                            }
+                        } else {
+                            showAlert(`⏰ Time's up! Nobody got it right - it's a tie!`, "warning");
+                            hidePanel(questionPanel);
+                            nextPlayer();
+                        }
+                    }
+                }
+            }, 1000);
+            
+            // Show challenge panel
+            showPanel(questionPanel);
+        }
+
+        // Show card selection for discard
+        function showCardSelectionForDiscard() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            cardSelectionContainer.innerHTML = "";
+            cardSelectionTitle.textContent = "Choose card to discard";
+            
+            // Add normal cards
+            currentPlayer.cards.forEach((card, index) => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = function() {
+                    currentPlayer.cards.splice(index, 1);
+                    hidePanel(cardSelectionPanel);
+                    updateGameDisplay();
+                    showAlert(`🗑️ Discarded: ${card.name}`, "info");
+                    nextPlayer();
+                };
+                cardSelectionContainer.appendChild(cardElement);
+            });
+            
+            // Add shield cards
+            currentPlayer.shieldCards.forEach((card, index) => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = function() {
+                    currentPlayer.shieldCards.splice(index, 1);
+                    hidePanel(cardSelectionPanel);
+                    updateGameDisplay();
+                    showAlert(`🗑️ Discarded: ${card.name}`, "info");
+                    nextPlayer();
+                };
+                cardSelectionContainer.appendChild(cardElement);
+            });
+            
+            // Show panel
+            showPanel(cardSelectionPanel);
+        }
+
+        // Create card element
+        function createCardElement(card, isInHand = false) {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+            if (isInHand) {
+                cardElement.classList.add('card-in-hand');
+            }
+            cardElement.style.backgroundColor = card.color;
+            
+            cardElement.innerHTML = `
+                <div class="card-emoji ${isInHand ? 'text-xl' : 'text-4xl'} mb-1">${card.emoji}</div>
+                <h3 class="card-name font-bold text-center ${isInHand ? 'text-xs' : 'text-sm'}">${card.name}</h3>
+                <p class="card-description text-xs text-center px-1 ${isInHand ? 'hidden' : ''}">${card.description}</p>
+            `;
+            
+            return cardElement;
+        }
+
+        // Draw normal card
+        function drawNormalCard() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const randomIndex = Math.floor(Math.random() * normalCards.length);
+            const card = normalCards[randomIndex];
+            
+            // Play card sound
+            try {
+                playSound('card');
+            } catch (e) {
+                // Ignore audio errors
+            }
+            
+            // Check if it's a Win Card
+            if (card.name === "Win Card") {
+                gameState.hasWinCard = true;
+                gameState.winCardPlayer = currentPlayer.id;
+            }
+            
+            currentPlayer.cards.push({...card});
+            updateGameDisplay();
+        }
+
+        // Draw shield card
+        function drawShieldCard() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const randomIndex = Math.floor(Math.random() * shieldCards.length);
+            const card = shieldCards[randomIndex];
+            
+            currentPlayer.shieldCards.push({...card});
+            showAlert(`🛡️ You got a shield card: ${card.name}!`, "success");
+            updateGameDisplay();
+        }
+
+        // Next player
+        function nextPlayer() {
+            if (gameState.movementInProgress) {
+                // Wait for movement to complete
+                setTimeout(nextPlayer, 100);
+                return;
+            }
+            
+            // Reset card usage for the current player's turn
+            gameState.players[gameState.currentPlayerIndex].usedCardThisTurn = false;
+            
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % 4;
+            
+            // Check if we completed a round
+            if (gameState.currentPlayerIndex === 0) {
+                gameState.currentRound++;
+                roundCounter.textContent = gameState.currentRound;
+                
+                // Check if game is over
+                if (gameState.currentRound > gameState.totalRounds) {
+                    endGame();
+                    return;
+                }
+            }
+            
+            updateGameDisplay();
+            
+            // If it's an AI player's turn, simulate their turn
+            if (gameState.players[gameState.currentPlayerIndex].isAI) {
+                setTimeout(() => {
+                    simulateAITurn();
+                }, 1500);
+            }
+        }
+
+        // Simulate AI turn
+        function simulateAITurn() {
+            if (!gameState.waitingForAction && !gameState.movementInProgress) {
+                const aiPlayer = gameState.players[gameState.currentPlayerIndex];
+                
+                // Show AI thinking
+                showAlert(`🤖 ${aiPlayer.name} is thinking...`, "info");
+                
+                setTimeout(() => {
+                    // AI automatically rolls dice
+                    rollDiceBtn.click();
+                }, 1000);
+            }
+        }
+
+        // Handle AI answering questions
+        function handleAIQuestion(zone) {
+            const aiPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            setTimeout(() => {
+                // AI has 75% chance to answer correctly
+                const isCorrect = Math.random() < 0.75;
+                
+                if (isCorrect) {
+                    aiPlayer.score++;
+                    drawNormalCard();
+                    showAlert(`🤖 ${aiPlayer.name} answered correctly! Got a card!`, "success");
+                } else {
+                    movePlayerBack(2);
+                    showAlert(`🤖 ${aiPlayer.name} answered wrong! Goes back 2 spaces!`, "error");
+                }
+                
+                nextPlayer();
+            }, 2000);
+        }
+
+        // Handle AI action selection
+        function handleAIAction() {
+            const aiPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            setTimeout(() => {
+                // AI randomly chooses an action
+                const actions = ["skip", "back", "discard"];
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                
+                switch (randomAction) {
+                    case "skip":
+                        showAlert(`🤖 ${aiPlayer.name} chose to skip the next player!`, "info");
+                        gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 2) % 4;
+                        break;
+                    case "back":
+                        showAlert(`🤖 ${aiPlayer.name} chose to go back 2 spaces!`, "warning");
+                        movePlayerBack(2);
+                        break;
+                    case "discard":
+                        if (aiPlayer.cards.length > 0 || aiPlayer.shieldCards.length > 0) {
+                            // AI discards a random card
+                            if (aiPlayer.cards.length > 0) {
+                                const discardedCard = aiPlayer.cards.splice(0, 1)[0];
+                                showAlert(`🤖 ${aiPlayer.name} discarded: ${discardedCard.name}`, "info");
+                            } else {
+                                const discardedCard = aiPlayer.shieldCards.splice(0, 1)[0];
+                                showAlert(`🤖 ${aiPlayer.name} discarded: ${discardedCard.name}`, "info");
+                            }
+                        } else {
+                            showAlert(`🤖 ${aiPlayer.name} has no cards! Goes back 2 spaces!`, "error");
+                            movePlayerBack(2);
+                        }
+                        break;
+                }
+                
+                nextPlayer();
+            }, 1500);
+        }
+
+        // Handle AI challenge
+        function handleAIChallenge() {
+            const aiPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            setTimeout(() => {
+                // AI chooses a random opponent
+                const availableOpponents = [];
+                for (let i = 0; i < 4; i++) {
+                    if (i !== gameState.currentPlayerIndex && i < gameState.selectedCharacters.length) {
+                        availableOpponents.push(i);
+                    }
+                }
+                
+                if (availableOpponents.length > 0) {
+                    const opponentIndex = availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
+                    const opponent = gameState.players[opponentIndex];
+                    
+                    showAlert(`🤖 ${aiPlayer.name} challenges ${opponent.name}!`, "warning");
+                    
+                    setTimeout(() => {
+                        // Simulate challenge outcome
+                        const aiWins = Math.random() < 0.6; // AI has 60% chance to win
+                        
+                        if (aiWins) {
+                            aiPlayer.shieldCards.push(shieldCards[Math.floor(Math.random() * shieldCards.length)]);
+                            showAlert(`⚔️ ${aiPlayer.name} won the challenge! Got a shield card!`, "success");
+                        } else {
+                            if (aiPlayer.cards.length > 0 || aiPlayer.shieldCards.length > 0) {
+                                // AI loses a random card
+                                if (aiPlayer.cards.length > 0) {
+                                    const lostCard = aiPlayer.cards.splice(0, 1)[0];
+                                    showAlert(`⚔️ ${aiPlayer.name} lost the challenge! Lost: ${lostCard.name}`, "error");
+                                } else {
+                                    const lostCard = aiPlayer.shieldCards.splice(0, 1)[0];
+                                    showAlert(`⚔️ ${aiPlayer.name} lost the challenge! Lost: ${lostCard.name}`, "error");
+                                }
+                            } else {
+                                movePlayerBack(2);
+                                showAlert(`⚔️ ${aiPlayer.name} lost the challenge! Goes back 2 spaces!`, "error");
+                            }
+                        }
+                        
+                        nextPlayer();
+                    }, 2000);
+                } else {
+                    showAlert(`🤖 ${aiPlayer.name} has no one to challenge!`, "warning");
+                    nextPlayer();
+                }
+            }, 1500);
+        }
+
+        // Update game display
+        function updateGameDisplay() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const humanPlayer = gameState.players[0];
+            
+            // Update all player info and avatars
+            gameState.players.forEach((player, index) => {
+                const playerNum = index + 1;
+                const avatar = document.getElementById(`player${playerNum}Avatar`);
+                const name = document.getElementById(`player${playerNum}Name`);
+                const score = document.getElementById(`player${playerNum}Score`);
+                const cardCount = document.getElementById(`player${playerNum}CardCount`);
+                const turnIndicator = document.getElementById(`player${playerNum}Turn`);
+                
+                if (avatar) avatar.textContent = player.emoji;
+                if (name) name.textContent = player.name;
+                if (score) score.textContent = player.score;
+                if (cardCount) cardCount.textContent = player.cards.length + player.shieldCards.length;
+                
+                // Update turn indicator
+                if (turnIndicator) {
+                    if (index === gameState.currentPlayerIndex) {
+                        turnIndicator.className = 'w-3 h-3 rounded-full bg-green-400 animate-pulse';
+                    } else {
+                        turnIndicator.className = 'w-2 h-2 rounded-full bg-gray-300';
+                    }
+                }
+            });
+            
+            // Update ability description
+            switch (currentPlayer.character) {
+                case 'frog':
+                    abilityDescription.textContent = `Jump Forward (${currentPlayer.abilityUsed}/${currentPlayer.abilityMaxUses})`;
+                    break;
+                case 'cat':
+                    abilityDescription.textContent = `Peek Cards (${currentPlayer.abilityUsed}/${currentPlayer.abilityMaxUses})`;
+                    break;
+                case 'rabbit':
+                    abilityDescription.textContent = `Dice Boost (${currentPlayer.abilityUsed}/${currentPlayer.abilityMaxUses})`;
+                    break;
+                case 'duck':
+                    abilityDescription.textContent = `Card Control (${currentPlayer.abilityUsed}/${currentPlayer.abilityMaxUses})`;
+                    break;
+            }
+
+            // Enable/disable special ability button
+            const canUseAbility = currentPlayer.abilityUsed < currentPlayer.abilityMaxUses && 
+                                gameState.currentRound % currentPlayer.abilityFrequency === 0;
+            specialAbilityBtn.disabled = !canUseAbility;
+            specialAbilityBtn.classList.toggle('opacity-50', !canUseAbility);
+            
+            // Update card button state
+            updateCardButtonState();
+            
+            // Update player cards in UNO style (always show human player's cards)
+            playerCards.innerHTML = "";
+            
+            // Add normal cards
+            humanPlayer.cards.forEach((card, index) => {
+                const cardElement = createCardElement(card, true);
+                cardElement.onclick = function() {
+                    // Toggle selection
+                    document.querySelectorAll('.card-selected').forEach(c => c.classList.remove('card-selected'));
+                    this.classList.add('card-selected');
+                };
+                playerCards.appendChild(cardElement);
+            });
+            
+            // Add shield cards
+            humanPlayer.shieldCards.forEach((card, index) => {
+                const cardElement = createCardElement(card, true);
+                cardElement.onclick = function() {
+                    // Toggle selection
+                    document.querySelectorAll('.card-selected').forEach(c => c.classList.remove('card-selected'));
+                    this.classList.add('card-selected');
+                };
+                playerCards.appendChild(cardElement);
+            });
+        }
+        
+        // Update card button visual state
+        function updateCardButtonState() {
+            const humanPlayer = gameState.players[0];
+            const isHumanTurn = gameState.currentPlayerIndex === 0;
+            
+            // Reset button to default state
+            useCardBtn.classList.remove('animate-pulse', 'bg-red-500', 'opacity-50');
+            useCardBtn.disabled = false;
+            
+            if (gameState.sabotageWindowOpen && !isHumanTurn) {
+                // Sabotage mode - check if player has sabotage cards
+                const hasSabotageCards = humanPlayer.cards.some(card => card.type === 'sabotage') || 
+                                       humanPlayer.shieldCards.some(card => card.type === 'sabotage');
+                
+                if (hasSabotageCards) {
+                    useCardBtn.classList.add('animate-pulse', 'bg-red-500');
+                    useCardBtn.innerHTML = `
+                        <span class="flex items-center justify-center gap-2">
+                            <span class="text-xl">💥</span>
+                            <span>Sabotage!</span>
+                            <span class="text-sm bg-yellow-400 text-red-700 px-2 py-1 rounded-full">NOW</span>
+                        </span>
+                    `;
+                } else {
+                    useCardBtn.classList.add('opacity-50');
+                    useCardBtn.disabled = true;
+                }
+            } else if (isHumanTurn && humanPlayer.usedCardThisTurn) {
+                // Human turn but already used a card
+                useCardBtn.classList.add('opacity-50');
+                useCardBtn.disabled = true;
+                useCardBtn.innerHTML = `
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">🃏</span>
+                        <span>Used This Turn</span>
+                        <span class="text-sm bg-gray-600 text-white px-2 py-1 rounded-full">✓</span>
+                    </span>
+                `;
+            } else if (isHumanTurn) {
+                // Human turn and can use cards
+                useCardBtn.innerHTML = `
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">🃏</span>
+                        <span>Use Card</span>
+                        <span class="text-sm bg-red-600 text-white px-2 py-1 rounded-full">Play</span>
+                    </span>
+                `;
+            } else {
+                // Not human turn and no sabotage window
+                useCardBtn.classList.add('opacity-50');
+                useCardBtn.disabled = true;
+                useCardBtn.innerHTML = `
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">⏳</span>
+                        <span>Wait Your Turn</span>
+                        <span class="text-sm bg-gray-600 text-white px-2 py-1 rounded-full">Wait</span>
+                    </span>
+                `;
+            }
+        }
+
+        // Get character name
+        function getCharacterName(character) {
+            switch (character) {
+                case 'frog': return 'Frog';
+                case 'cat': return 'Cat';
+                case 'rabbit': return 'Rabbit';
+                case 'duck': return 'Duck';
+                default: return '';
+            }
+        }
+
+        // Special ability button
+        specialAbilityBtn.addEventListener('click', () => {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            switch (currentPlayer.character) {
+                case 'frog':
+                    // Frog ability - Jump to another zone
+                    showAlert("🐸 Frog power activated! Jumping ahead!", "success");
+                    // Simplified implementation - just move forward 5 spaces
+                    const newPosition = (currentPlayer.position + 5) % boardCellDefinitions.length;
+                    movePlayerToken(currentPlayer.id, newPosition);
+                    break;
+                case 'cat':
+                    // Cat ability - Peek at top card
+                    const randomCard = normalCards[Math.floor(Math.random() * normalCards.length)];
+                    showAlert(`🐱 Cat power! Peeked at: ${randomCard.name}`, "info");
+                    break;
+                case 'rabbit':
+                    // Rabbit ability - Add 5 to dice roll
+                    currentPlayer.abilityActive = true;
+                    showAlert("🐰 Rabbit power! Next dice roll gets +5!", "success");
+                    break;
+                case 'duck':
+                    // Duck ability - Discard a card
+                    if (currentPlayer.cards.length > 0 || currentPlayer.shieldCards.length > 0) {
+                        cardSelectionTitle.textContent = "Choose card to discard (Special Ability)";
+                        showCardSelectionForDiscard();
+                    } else {
+                        showAlert("🦆 No cards to discard!", "warning");
+                    }
+                    break;
+            }
+            
+            currentPlayer.abilityUsed++;
+            updateGameDisplay();
+        });
+
+        // Use card button
+        useCardBtn.addEventListener('click', () => {
+            const humanPlayer = gameState.players[0]; // Human player is always index 0
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            // Check if it's human player's turn and they already used a card
+            if (gameState.currentPlayerIndex === 0 && humanPlayer.usedCardThisTurn) {
+                showAlert("🚫 You already used a card this turn!", "warning");
+                return;
+            }
+            
+            // Check if it's not human player's turn but sabotage window is open
+            if (gameState.currentPlayerIndex !== 0 && !gameState.sabotageWindowOpen) {
+                showAlert("⏳ You can only use cards on your turn or during sabotage windows!", "warning");
+                return;
+            }
+            
+            if (humanPlayer.cards.length > 0 || humanPlayer.shieldCards.length > 0) {
+                showCardSelectionForUse();
+            } else {
+                showAlert("📋 No cards in hand!", "warning");
+            }
+        });
+        
+        // Enable card usage during sabotage windows
+        function enableSabotageCardUsage() {
+            const humanPlayer = gameState.players[0];
+            
+            // Check if human player has sabotage cards
+            const sabotageCards = humanPlayer.cards.filter(card => card.type === 'sabotage');
+            
+            if (sabotageCards.length > 0 && gameState.sabotageWindowOpen) {
+                useCardBtn.classList.add('animate-pulse', 'bg-red-500');
+                useCardBtn.innerHTML = `
+                    <span class="flex items-center justify-center gap-2">
+                        <span class="text-xl">💥</span>
+                        <span>Sabotage!</span>
+                        <span class="text-sm bg-yellow-400 text-red-700 px-2 py-1 rounded-full">NOW</span>
+                    </span>
+                `;
+            }
+        }
+
+        // Show card selection for use
+        function showCardSelectionForUse() {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            cardSelectionContainer.innerHTML = "";
+            cardSelectionTitle.textContent = "Choose card to use";
+            
+            // Add normal cards
+            currentPlayer.cards.forEach((card, index) => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = function() {
+                    useCard(card, 'normal', index);
+                    hidePanel(cardSelectionPanel);
+                };
+                cardSelectionContainer.appendChild(cardElement);
+            });
+            
+            // Add shield cards
+            currentPlayer.shieldCards.forEach((card, index) => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = function() {
+                    useCard(card, 'shield', index);
+                    hidePanel(cardSelectionPanel);
+                };
+                cardSelectionContainer.appendChild(cardElement);
+            });
+            
+            // Show panel
+            showPanel(cardSelectionPanel);
+        }
+
+        // Use card
+        function useCard(card, type, index) {
+            const humanPlayer = gameState.players[0]; // Human player is always index 0
+            
+            // Handle sabotage cards differently
+            if (card.type === 'sabotage' && gameState.sabotageWindowOpen) {
+                // Remove card from human player's hand (sabotage cards are always used by human player)
+                if (type === 'normal') {
+                    humanPlayer.cards.splice(index, 1);
+                } else {
+                    humanPlayer.shieldCards.splice(index, 1);
+                }
+                
+                // Apply sabotage to current active player
+                applySabotageCard(card.name, gameState.currentPlayerIndex);
+                updateGameDisplay();
+                return;
+            }
+            
+            // For regular card usage on player's own turn
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            // Remove card from player's hand
+            if (type === 'normal') {
+                currentPlayer.cards.splice(index, 1);
+            } else {
+                currentPlayer.shieldCards.splice(index, 1);
+            }
+            
+            // Mark that player used a card this turn
+            currentPlayer.usedCardThisTurn = true;
+            
+            // Apply card effect
+            showAlert(`🃏 Used card: ${card.name}!`, "success");
+            
+            // Simple implementation of some card effects
+            switch (card.name) {
+                case "Re-roll":
+                    // Allow player to roll again
+                    break;
+                case "Move Back":
+                    // Choose player to move back
+                    showChallengePanel();
+                    break;
+                case "Bonus Points":
+                    // Will be applied on next roll
+                    currentPlayer.abilityActive = true;
+                    break;
+                case "Win Card":
+                    // Instant win
+                    gameState.hasWinCard = true;
+                    gameState.winCardPlayer = currentPlayer.id;
+                    endGame();
+                    return;
+                default:
+                    // Other cards would have more complex implementations
+                    break;
+            }
+            
+            updateGameDisplay();
+        }
+
+        // Timer functions
+        function startQuestionTimer(seconds, zone) {
+            gameState.currentTimerSeconds = seconds;
+            gameState.sabotageWindowOpen = true;
+            
+            // Create timer display
+            const timerDiv = document.createElement('div');
+            timerDiv.className = 'text-center mt-4 p-3 bg-red-100 rounded-lg border-2 border-red-300';
+            timerDiv.id = 'questionTimerDisplay';
+            timerDiv.innerHTML = `
+                <div class="text-2xl font-bold text-red-600 mb-2">⏰ ${seconds}s</div>
+                <div class="text-sm text-red-500">Other players can use sabotage cards!</div>
+            `;
+            questionText.appendChild(timerDiv);
+            
+            // Enable sabotage for other players
+            enableSabotageForOthers();
+            
+            gameState.questionTimer = setInterval(() => {
+                gameState.currentTimerSeconds--;
+                timerDiv.querySelector('.text-2xl').textContent = `⏰ ${gameState.currentTimerSeconds}s`;
+                
+                if (gameState.currentTimerSeconds <= 0) {
+                    clearInterval(gameState.questionTimer);
+                    gameState.sabotageWindowOpen = false;
+                    disableSabotageForOthers();
+                    
+                    // Time's up - wrong answer
+                    handleAnswer(false, zone);
+                }
+            }, 1000);
+        }
+        
+        function startActionTimer(seconds) {
+            gameState.currentTimerSeconds = seconds;
+            gameState.sabotageWindowOpen = true;
+            
+            // Create timer display
+            const timerDiv = document.createElement('div');
+            timerDiv.className = 'text-center mt-4 p-3 bg-orange-100 rounded-lg border-2 border-orange-300';
+            timerDiv.id = 'actionTimerDisplay';
+            timerDiv.innerHTML = `
+                <div class="text-2xl font-bold text-orange-600 mb-2">⏰ ${seconds}s</div>
+                <div class="text-sm text-orange-500">Choose an action quickly!</div>
+            `;
+            actionPanel.querySelector('.panel-content').appendChild(timerDiv);
+            
+            // Enable sabotage for other players
+            enableSabotageForOthers();
+            
+            gameState.actionTimer = setInterval(() => {
+                gameState.currentTimerSeconds--;
+                timerDiv.querySelector('.text-2xl').textContent = `⏰ ${gameState.currentTimerSeconds}s`;
+                
+                if (gameState.currentTimerSeconds <= 0) {
+                    clearInterval(gameState.actionTimer);
+                    gameState.sabotageWindowOpen = false;
+                    disableSabotageForOthers();
+                    
+                    // Time's up - default action (go back 2 spaces)
+                    hidePanel(actionPanel);
+                    movePlayerBack(2);
+                    showAlert("⏰ Time's up! You go back 2 spaces!", "error");
+                    nextPlayer();
+                }
+            }, 1000);
+        }
+        
+        function enableSabotageForOthers() {
+            // Show sabotage notification to other players
+            if (gameState.currentPlayerIndex !== 0) return; // Only show for human player
+            
+            showAlert("🃏 Other players can now use sabotage cards against you!", "warning");
+            enableSabotageCardUsage();
+        }
+        
+        function disableSabotageForOthers() {
+            // Clean up sabotage UI
+            const timerDisplays = document.querySelectorAll('#questionTimerDisplay, #actionTimerDisplay');
+            timerDisplays.forEach(display => display.remove());
+            
+            // Reset card button
+            useCardBtn.classList.remove('animate-pulse', 'bg-red-500');
+            useCardBtn.innerHTML = `
+                <span class="flex items-center justify-center gap-2">
+                    <span class="text-xl">🃏</span>
+                    <span>Use Card</span>
+                    <span class="text-sm bg-red-600 text-white px-2 py-1 rounded-full">Play</span>
+                </span>
+            `;
+        }
+        
+        function applySabotageCard(cardName, targetPlayerIndex) {
+            const targetPlayer = gameState.players[targetPlayerIndex];
+            
+            switch (cardName) {
+                case "Time Sabotage":
+                    // Reduce timer by 15 seconds
+                    gameState.currentTimerSeconds = Math.max(1, gameState.currentTimerSeconds - 15);
+                    showAlert(`⏰ Time sabotage used! Timer reduced by 15 seconds!`, "error");
+                    break;
+                case "Confusion":
+                    // Scramble answer options (visual effect)
+                    const answerButtons = document.querySelectorAll('.answer-btn');
+                    answerButtons.forEach(btn => {
+                        btn.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            btn.style.animation = '';
+                        }, 500);
+                    });
+                    showAlert(`🌀 Confusion card used! Answer options scrambled!`, "error");
+                    break;
+            }
+        }
+
+        // End game
+        function endGame() {
+            // Calculate final scores and create leaderboard
+            let winner;
+            let winReason = "Highest Score!";
+            
+            // Check if someone has the Win Card
+            if (gameState.hasWinCard) {
+                winner = gameState.players.find(player => player.id === gameState.winCardPlayer);
+                winReason = "Found the Win Card! 🏆";
+            } else {
+                // Find player with highest score
+                let highestScore = -1;
+                gameState.players.forEach(player => {
+                    if (player.score > highestScore) {
+                        highestScore = player.score;
+                        winner = player;
+                    }
+                });
+            }
+            
+            // Sort players by score for leaderboard
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+            
+            // Update winner showcase
+            document.getElementById('winnerEmoji').textContent = winner.emoji;
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerScore').textContent = winner.score;
+            document.getElementById('winnerReason').textContent = winReason;
+            
+            // Update leaderboard
+            sortedPlayers.forEach((player, index) => {
+                const nameElement = document.getElementById(`leaderboard${index + 1}Name`);
+                const scoreElement = document.getElementById(`leaderboard${index + 1}Score`);
+                
+                if (nameElement && scoreElement) {
+                    nameElement.textContent = `${player.emoji} ${player.name}`;
+                    scoreElement.textContent = player.score;
+                }
+            });
+            
+            // Create epic win screen effects
+            createConfetti();
+            createFireworks();
+            
+            // Show end game modal with animation
+            gameEndModal.style.display = "flex";
+            
+            // Play victory sound
+            try {
+                playVictorySound();
+            } catch (e) {
+                // Ignore audio errors
+            }
+        }
+        
+        // Create confetti animation
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confettiContainer');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti-piece';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confettiContainer.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        if (confetti.parentNode) {
+                            confetti.parentNode.removeChild(confetti);
+                        }
+                    }, 5000);
+                }, i * 100);
+            }
+        }
+        
+        // Create fireworks animation
+        function createFireworks() {
+            const fireworksContainer = document.getElementById('fireworksContainer');
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.animationDelay = Math.random() * 2 + 's';
+                    fireworksContainer.appendChild(firework);
+                    
+                    // Remove firework after animation
+                    setTimeout(() => {
+                        if (firework.parentNode) {
+                            firework.parentNode.removeChild(firework);
+                        }
+                    }, 3000);
+                }, i * 200);
+            }
+        }
+        
+        // Play victory sound
+        function playVictorySound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Victory fanfare - ascending major chord
+            const notes = [261.63, 329.63, 392.00, 523.25]; // C, E, G, C
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 1);
+                }, i * 200);
+            });
+        }
+
+        // Play again button
+        playAgainBtn.addEventListener('click', () => {
+            location.reload();
+        });
+        
+        // Back to main menu button
+        document.getElementById('backToMainMenuBtn').addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97337a778764a1b5',t:'MTc1NTg3NzMyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
